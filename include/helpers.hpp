@@ -6,35 +6,65 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <random>
 
+#define MAXGENRAND 0x100000000  // 2^32
+
+template <typename T>
 class Timer {
-private:
-  std::chrono::time_point<std::chrono::high_resolution_clock> start;
-  std::chrono::time_point<std::chrono::high_resolution_clock> end;
+   private:
+    std::chrono::time_point<std::chrono::high_resolution_clock> start;
+    std::chrono::time_point<std::chrono::high_resolution_clock> end;
 
-public:
-  void start_timer() { this->start = std::chrono::high_resolution_clock::now(); }
-  void stop_timer() { this->end = std::chrono::high_resolution_clock::now(); }
+   public:
+    void start_timer() {
+        this->start = std::chrono::high_resolution_clock::now();
+    }
+    void stop_timer() {
+        this->end = std::chrono::high_resolution_clock::now();
+    }
 
-  auto time_elapsed() {
-    return std::chrono::duration_cast<std::chrono::microseconds>(this->end - this->start)
-        .count();
-  }
+    std::string time_elapsed() {
+        auto time_taken = std::chrono::duration_cast<T>(this->end - this->start).count();
+
+        std::string unit = "";
+        if (std::is_same<T, std::chrono::seconds>::value)
+            unit = "s";
+        else if (std::is_same<T, std::chrono::milliseconds>::value)
+            unit = "ms";
+        else if (std::is_same<T, std::chrono::microseconds>::value)
+            unit = "us";
+        else if (std::is_same<T, std::chrono::nanoseconds>::value)
+            unit = "ns";
+
+        return std::to_string(time_taken) + " " + unit;
+    }
 };
 
-template < typename T >
-void random_vector_generator(std::vector<T> &inputData) {
-  time_t seed = time(NULL);
-  std::cout << "Seed: " << seed << std::endl;
-  srand(seed);
+template <typename T>
+std::vector<T> generateRandomData(const size_t arrSize, T minVal, T maxVal, uint32_t seed) {
+    // mersene-twisster generator which generates same random number as in python's random number generator
+    std::mt19937 gen(seed);
 
-  std::cout << "Array dim : " << inputData.size() << std::endl;
+    std::vector<T> arr(arrSize);
 
-  T offset = -5;
-  T range = 10;
-  for (size_t i = 0; i < inputData.size(); i++) {
-    inputData[i] = offset + range * (rand() / (T)RAND_MAX);
-  }
+    T range = maxVal - minVal;
+
+    for (size_t i = 0; i < arr.size(); i++) {
+        arr[i] = minVal + range * gen() / MAXGENRAND;
+    }
+
+    return arr;
+}
+
+template <typename T>
+std::vector<T> generateSequentialData(const size_t arrSize, T start, T diff) {
+    std::vector<T> arr(arrSize);
+
+    for (size_t i = 0; i < arr.size(); i++) {
+        arr[i] = start + (T)(i * diff);
+    }
+    return arr;
 }
 
 void assert_int(size_t expected, size_t actual, std::string str) {

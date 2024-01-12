@@ -1,5 +1,6 @@
 #include "helpers.hpp"
 #include <cfloat>
+#include <chrono>
 #include <iostream>
 #include <vector>
 #include <climits>
@@ -13,10 +14,9 @@
 #include "sse2neon.h"
 #endif
 
-void golden(const std::vector<float> &arr, size_t N, float &min, float &max) {
-  min = FLT_MAX;
-  max = FLT_MIN;
-  for (size_t i = 0; i < N; i++) {
+void golden(const std::vector<float> &arr, float &min, float &max) {
+  min = max = arr[0];
+  for (size_t i = 1; i < arr.size(); i++) {
     if (min > arr[i]) {
       min = arr[i];
     }
@@ -77,23 +77,25 @@ void simd_sse(float *arr, size_t N, float &min, float &max) {
 }
 
 int main(int argc, char **argv) {
+
   if (argc < 2) {
-    std::cerr << " usage: ./min-max <N>" << std::endl;
+    std::cerr << "Usage: ./min-max size-exponent" << std::endl;
+    std::cerr << "Size of the array generated will be 2^(size-exponent)" << std::endl;
     return 1;
   }
 
-  size_t N = atoi(argv[1]);
-  std::vector<float> arr(N);
+  int exponent = std::atoi(argv[1]);
+  const size_t N = std::pow(2, exponent);
 
-  random_vector_generator(arr);
+  std::vector<float> arr = generateRandomData<float>(N, -10000.0, 10000.0, 10);
+
+  Timer<std::chrono::microseconds> t;
 
   float minExpected = FLT_MAX, maxExpected = FLT_MIN;
   {
-    Timer t;
-
     t.start_timer();
 
-    golden(arr, N, minExpected, maxExpected);
+    golden(arr, minExpected, maxExpected);
 
     t.stop_timer();
 
@@ -101,11 +103,8 @@ int main(int argc, char **argv) {
               << std::endl;
   }
 
-  std::cout << "min: " << minExpected << " max " << maxExpected << std::endl;
-
   {
     float minActual = FLT_MAX, maxActual = FLT_MIN;
-    Timer t;
 
     t.start_timer();
     simd_sse(arr.data(), N, minActual, maxActual);

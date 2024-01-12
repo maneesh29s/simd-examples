@@ -1,23 +1,29 @@
 processor := $(shell uname -m)
 ifeq ($(processor),$(filter $(processor),aarch64 arm64))
-    ARCH_C_FLAGS+=-march=armv8-a+fp+simd+crc
+    ARCHFLAGS+=-march=armv8-a+fp+simd+crc
 else ifeq ($(processor),$(filter $(processor),i386 x86_64))
-    ARCH_C_FLAGS+=-march=native
+    ARCHFLAGS+=-march=native
 endif
 
-CXX=g++ -std=c++14 -O3 -I include/
+CXX=g++
 
-all: abs min-max-bench
+CXXFLAGS=-std=c++17 -O3 -Wall -Wextra -I include/
+
+CXXFLAGS+=#pkg-config flags
+
+LDFLAGS=#dynamically linked libraries
+
+# DEBUGOPTIONS=-fsanitize=address -g -fno-omit-frame-pointer
+
+all: src/abs src/min-max
 
 src/% : src/%.cpp dir
-	$(CXX) -o build/$@ $< $(CXXFLAGS) $(OMPFLAGS) $(ARCH_C_FLAGS) $(OPT)
+	$(CXX) -o build/$@ $< $(CXXFLAGS) $(LDFLAGS) $(DEBUGOPTIONS) $(OMPFLAGS) $(ARCHFLAGS) $(EXTRA)
 
-clean:
-	rm -r build/*
-
-.PHONY: dir
+.PHONY: dir clean
 
 dir:
 	mkdir -p build/src
 
-
+clean:
+	rm -r build/*

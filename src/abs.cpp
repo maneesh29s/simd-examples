@@ -1,7 +1,8 @@
 #include "helpers.hpp"
+#include <chrono>
+#include <climits>
 #include <iostream>
 #include <vector>
-#include <climits>
 
 #ifdef __x86_64__
 #include <immintrin.h>
@@ -11,7 +12,7 @@
 #include "sse2neon.h"
 #endif
 
-Timer stop_watch;
+Timer<std::chrono::microseconds> t;
 
 void abs_golden(std::vector<int> &arr, std::vector<int> &expected) {
   for (size_t i = 0; i < arr.size(); i++) {
@@ -43,38 +44,37 @@ void abs_sse(std::vector<int> &arr, std::vector<int> &abs_arr) {
 
 int main(int argc, char **argv) {
   if (argc < 2) {
-    std::cerr << " usage: " << argv[0] << " <N>" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " size-exponent" << std::endl;
+    std::cerr << "Size of the array generated will be 2^(size-exponent)" << std::endl;
     return 1;
   }
 
   // generate random data vector of size N
-  size_t N = std::atoi(argv[1]);
-  std::vector<int> inputData(N);
-  random_vector_generator(inputData);
+  int exponent = std::atoi(argv[1]);
+  size_t N = std::pow(2, exponent);
+
+  std::vector<int> inputData = generateSequentialData(N, -1000000, 2);
 
   // GOLDEN Approach. Calculates "expected" values
   std::vector<int> expected(N);
-  stop_watch.start_timer();
-  
-  abs_golden(inputData, expected);
-  
-  stop_watch.stop_timer();
-  std::cout << "Elapsed time GOLDEN " << stop_watch.time_elapsed() << " us"
-            << std::endl;
-
-  // SSE Approach
-  std::vector<int> sse_actual(N);
-  stop_watch.start_timer();
-
-  abs_sse(inputData, sse_actual);
-  
-  stop_watch.stop_timer();
-  std::cout << "Elapsed time SSE " << stop_watch.time_elapsed() << " us"
-            << std::endl;
-
-  for (size_t i = 0; i < N; i++) {
-    assert_int(expected[i], sse_actual[i], "SSE");
+  {
+    t.start_timer();
+    abs_golden(inputData, expected);
+    t.stop_timer();
+    std::cout << "Elapsed time GOLDEN " << t.time_elapsed() << " us"
+              << std::endl;
   }
+  // SSE Approach
+  {
+    std::vector<int> sse_actual(N);
+    t.start_timer();
+    abs_sse(inputData, sse_actual);
+    t.stop_timer();
+    std::cout << "Elapsed time SSE " << t.time_elapsed() << " us" << std::endl;
 
-  std::cout << "Assertion is successful" << std::endl;
+    for (size_t i = 0; i < N; i++) {
+      assert_int(expected[i], sse_actual[i], "SSE");
+    }
+    std::cout << "Assertion is successful" << std::endl;
+  }
 }
