@@ -1,10 +1,10 @@
 #include "helpers.hpp"
 #include <cfloat>
 #include <chrono>
-#include <iostream>
-#include <vector>
 #include <climits>
+#include <iostream>
 #include <stddef.h>
+#include <vector>
 
 #ifdef __x86_64__
 #include <immintrin.h>
@@ -31,7 +31,7 @@ void simd_sse(float *arr, size_t N, float &min, float &max) {
 
   assert(N < (size_t)INT_MAX);
 
-  // 4 32-bit floats stored in 128-bit registers 
+  // 4 32-bit floats stored in 128-bit registers
   const int simd_width = 4;
   __m128 arr_r = _mm_loadu_ps(arr);
   __m128 max_r = arr_r;
@@ -80,7 +80,8 @@ int main(int argc, char **argv) {
 
   if (argc < 2) {
     std::cerr << "Usage: ./min-max size-exponent" << std::endl;
-    std::cerr << "Size of the array generated will be 2^(size-exponent)" << std::endl;
+    std::cerr << "Size of the array generated will be 2^(size-exponent)"
+              << std::endl;
     return 1;
   }
 
@@ -99,8 +100,7 @@ int main(int argc, char **argv) {
 
     t.stop_timer();
 
-    std::cout << "Elapsed time golden: " << t.time_elapsed() << " us"
-              << std::endl;
+    std::cout << "Elapsed time golden: " << t.time_elapsed() << std::endl;
   }
 
   {
@@ -109,10 +109,11 @@ int main(int argc, char **argv) {
     t.start_timer();
     simd_sse(arr.data(), N, minActual, maxActual);
     t.stop_timer();
-    std::cout << "Elapsed time SIMD SSE: " << t.time_elapsed() << " us"
-              << std::endl;
+    std::cout << "Elapsed time SIMD SSE: " << t.time_elapsed() << std::endl;
 
-    assert_float(maxExpected, maxActual, "maxSSE");
-    assert_float(minExpected, minActual, "minSSE");
+    assertFloat(maxExpected, maxActual, "maxSSE");
+    assertFloat(minExpected, minActual, "minSSE");
+
+    std::cout << "Assertion is successful for SSE" << std::endl;
   }
 }
