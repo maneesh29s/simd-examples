@@ -26,6 +26,35 @@ void golden(const std::vector<float> &arr, float &min, float &max) {
   }
 }
 
+void openmp(const std::vector<float> &arr, float &min, float &max) {
+  min = max = arr[0];
+  size_t N = arr.size();
+#pragma omp parallel
+  {
+    float min_local = min;
+    float max_local = max;
+#pragma omp for nowait
+    for (size_t i = 1; i < N; i++) {
+      float tmp = arr[i];
+      if (tmp < min_local) {
+        min_local = tmp;
+      }
+      if (tmp > max_local) {
+        max_local = tmp;
+      }
+    }
+#pragma omp critical
+    {
+      if (min_local < min) {
+        min = min_local;
+      }
+      if (max_local > max) {
+        max = max_local;
+      }
+    }
+  }
+}
+
 // SSE code - 128 bit registers
 void simd_sse(float *arr, size_t N, float &min, float &max) {
 
@@ -115,5 +144,19 @@ int main(int argc, char **argv) {
     assertFloat(minExpected, minActual, "minSSE");
 
     std::cout << "Assertion is successful for SSE" << std::endl;
+  }
+
+  {
+    float minActual = FLT_MAX, maxActual = FLT_MIN;
+
+    t.start_timer();
+    openmp(arr, minActual, maxActual);
+    t.stop_timer();
+    std::cout << "Elapsed time openmp: " << t.time_elapsed() << std::endl;
+
+    assertFloat(maxExpected, maxActual, "openmp");
+    assertFloat(minExpected, minActual, "openmp");
+
+    std::cout << "Assertion is successful for openmp" << std::endl;
   }
 }
