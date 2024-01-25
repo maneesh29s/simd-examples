@@ -1,9 +1,6 @@
 #ifndef include_simd_h
 #define include_simd_h
 
-#include <assert.h>
-#include <limits.h>
-
 #ifdef __x86_64__
 #include <immintrin.h>
 #endif
@@ -13,7 +10,6 @@
 #endif
 
 static void absSSE(int const *const arr, size_t const N, int *const abs_arr) {
-  assert(N < (size_t)INT_MAX);
 
   const int simd_width = 4;
   size_t quot = N / simd_width;
@@ -37,8 +33,6 @@ static void absSSE(int const *const arr, size_t const N, int *const abs_arr) {
 // SSE code operating on 32-bit floats
 static void minMaxSSE(float const *const arr, size_t const N, float *const min,
                       float *const max) {
-
-  assert(N < (size_t)INT_MAX);
 
   // 4 32-bit floats stored in 128-bit registers
   const int simd_width = 4;
@@ -88,8 +82,6 @@ static void minMaxSSE(float const *const arr, size_t const N, float *const min,
 // Multithreaded SSE code operating on 32-bit floats
 static void minMaxSSEOMP(float const *const arr, size_t const N,
                          float *const min, float *const max) {
-
-  assert(N < (size_t)INT_MAX);
 
   // 4 32-bit floats stored in 128-bit registers
   const int simd_width = 4;
@@ -157,8 +149,7 @@ static void minMaxSSEOMP(float const *const arr, size_t const N,
 static void minMaxAVX(float const *const arr, size_t const N, float *const min,
                       float *const max) {
 
-  assert(N < (size_t)INT_MAX);
-
+  // 8 32-bit floats stored in 256-bit registers
   const int simd_width = 8;
   __m256 arr_r = _mm256_loadu_ps(arr);
   __m256 max_r = arr_r;
@@ -209,8 +200,6 @@ static void minMaxAVX(float const *const arr, size_t const N, float *const min,
 // Multithreaded AVX code operating on 32-bit floats
 static void minMaxAVXOMP(float const *const arr, size_t const N,
                          float *const min, float *const max) {
-
-  assert(N < (size_t)INT_MAX);
 
   // 8 32-bit floats stored in 256-bit registers
   const int simd_width = 8;
