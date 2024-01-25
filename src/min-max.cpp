@@ -6,6 +6,12 @@
 #include <iostream>
 #include <vector>
 
+/*
+"Golden" algorithm to find minimum and maximum value
+Takes a floating vector "arr" as input.
+Writes the minimum and maximum value in the "min" and "max" variables
+respectively, which are passed as reference.
+*/
 void minMaxGolden(const std::vector<float> &arr, float &min, float &max) {
   min = max = arr[0];
   for (size_t i = 1; i < arr.size(); i++) {
@@ -54,4 +60,19 @@ int main(int argc, char **argv) {
     assertFloat(minExpected, minActual, "minSSE");
     std::cout << "Assertion is successful for SSE" << std::endl;
   }
+
+#ifdef __AVX__
+  {
+    float minActual = FLT_MAX, maxActual = FLT_MIN;
+
+    t.start_timer();
+    minMaxAVX(arr.data(), N, &minActual, &maxActual);
+    t.stop_timer();
+    std::cout << "Elapsed time SIMD AVX: " << t.time_elapsed() << std::endl;
+
+    assertFloat(maxExpected, maxActual, "maxSSE");
+    assertFloat(minExpected, minActual, "minSSE");
+    std::cout << "Assertion is successful for AVX" << std::endl;
+  }
+#endif
 }

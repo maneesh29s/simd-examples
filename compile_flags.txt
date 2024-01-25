@@ -7,6 +7,3 @@ include/
 /Users/maneeshsutar/opt/include
 -I
 /opt/homebrew/include
--DGOLDEN
--DSSE2NEON
--DASSERT
