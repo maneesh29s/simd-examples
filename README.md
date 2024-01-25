@@ -6,14 +6,13 @@ This repo contains SIMD implementations of
 
 2. Minimum and Maximum value calculator
 
-## to compile on m1 mac
+NOTE: We are able to run SSE instrinsics on ARM using a header file `sse2neon.h`, which converts the SSE intrinsics into equivalent ARM NEON intrinsics. 
 
-```cpp
-g++ -std=c++14 -O3 -march=armv8-a+fp+simd+crc -I include/ -o <output> <input>
-```
+Running AVX instrinsincs on ARM machine is not possible.
 
-## to compile on x86_64
 
-```cpp
-g++ -std=c++14 -O3 -march=native -I include/ -o <output> <input>
-```
+## How to compile
+
+Run `make all` which will compile both min-max.cpp and abs.cpp and store the executable in `build/src` directory.
+Have a look at the Makefile to see which options are included.
+

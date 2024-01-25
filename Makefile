@@ -1,3 +1,10 @@
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	OMPFLAGS += -fopenmp
+else ifeq ($(UNAME_S),Darwin)
+	OMPFLAGS += -Xpreprocessor -fopenmp -lomp
+endif
+
 processor := $(shell uname -m)
 ifeq ($(processor),$(filter $(processor),aarch64 arm64))
     ARCHFLAGS+=-march=armv8-a+fp+simd+crc

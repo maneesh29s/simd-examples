@@ -61,6 +61,19 @@ int main(int argc, char **argv) {
     std::cout << "Assertion is successful for SSE" << std::endl;
   }
 
+  {
+    float minActual = FLT_MAX, maxActual = FLT_MIN;
+
+    t.start_timer();
+    minMaxSSEOMP(arr.data(), N, &minActual, &maxActual);
+    t.stop_timer();
+    std::cout << "Elapsed time SIMD SSE OMP: " << t.time_elapsed() << std::endl;
+
+    assertFloat(maxExpected, maxActual, "maxSSE");
+    assertFloat(minExpected, minActual, "minSSE");
+    std::cout << "Assertion is successful for SSE OMP" << std::endl;
+  }
+
 #ifdef __AVX__
   {
     float minActual = FLT_MAX, maxActual = FLT_MIN;
@@ -73,6 +86,19 @@ int main(int argc, char **argv) {
     assertFloat(maxExpected, maxActual, "maxSSE");
     assertFloat(minExpected, minActual, "minSSE");
     std::cout << "Assertion is successful for AVX" << std::endl;
+  }
+
+  {
+    float minActual = FLT_MAX, maxActual = FLT_MIN;
+
+    t.start_timer();
+    minMaxAVXOMP(arr.data(), N, &minActual, &maxActual);
+    t.stop_timer();
+    std::cout << "Elapsed time SIMD AVX OMP: " << t.time_elapsed() << std::endl;
+
+    assertFloat(maxExpected, maxActual, "maxSSE");
+    assertFloat(minExpected, minActual, "minSSE");
+    std::cout << "Assertion is successful for AVX OMP" << std::endl;
   }
 #endif
 }
