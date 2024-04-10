@@ -45,7 +45,7 @@ std::vector<T> generateRandomData(const size_t arrSize, T minVal, T maxVal,
 
   std::vector<T> arr(arrSize);
 
-  double range = maxVal - minVal;
+  T range = maxVal - minVal;
 
   for (size_t i = 0; i < arr.size(); i++) {
     arr[i] = minVal + static_cast<T>(range * gen() / MAXGENRAND);
